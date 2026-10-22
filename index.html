@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOCIETY OF SINNERS</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #080508;
+  color: #f6edf0;
+  font-family: Georgia, serif;
+}
+header {
+  text-align: center;
+  padding: 75px 20px 45px;
+  background: radial-gradient(ellipse at top, #400b20, #080508 75%);
+}
+h1 {
+  color: #ff3e79;
+  font-size: clamp(32px, 7vw, 75px);
+  letter-spacing: 5px;
+  margin: 0;
+  text-shadow: 0 0 25px #a40043;
+}
+.subtitle {
+  color: #caa8b3;
+  letter-spacing: 4px;
+  margin-top: 18px;
+}
+.controls {
+  text-align: center;
+  padding: 25px;
+}
+input {
+  width: min(450px, 95%);
+  padding: 15px 20px;
+  background: #170d14;
+  border: 1px solid #a72952;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  max-width: 1350px;
+  margin: auto;
+  padding: 25px;
+}
+.card {
+  background: #140c12;
+  border: 1px solid #572037;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .2s, border-color .2s;
+}
+.card:hover {
+  transform: translateY(-5px);
+  border-color: #ff3e79;
+}
+.card img {
+  width: 100%;
+  height: 280px;
+  object-fit: contain;
+  background: #080508;
+}
+.card h2 {
+  font-size: 17px;
+  text-align: center;
+  padding: 12px;
+  margin: 0;
+}
+#modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: rgba(0,0,0,.95);
+  padding: 25px;
+  overflow: auto;
+  text-align: center;
+}
+#modal.open { display: block; }
+#modal img {
+  display: block;
+  max-width: 95%;
+  max-height: 75vh;
+  margin: 30px auto 10px;
+  object-fit: contain;
+}
+#close {
+  background: #ff3e79;
+  border: 0;
+  border-radius: 6px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 16px;
+}
+footer {
+  text-align: center;
+  color: #a17c8a;
+  padding: 45px 20px;
+}
+
+.official-logo {
+  display: block;
+  width: min(650px, 95%);
+  height: auto;
+  margin: 0 auto;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="society-logo.png" alt="SOCIETY OF SINNERS" class="official-logo">
+  <p class="subtitle">ENTER IF YOU DARE</p>
+</header>
+
+<div class="controls">
+  <input id="search" type="search" placeholder="Search artwork..." aria-label="Search artwork">
+  <p id="count"></p>
+</div>
+
+<main class="grid" id="gallery"></main>
+
+<div id="modal" role="dialog" aria-modal="true" aria-label="Artwork preview">
+  <button id="close" type="button">✕ CLOSE</button>
+  <h2 id="modalTitle"></h2>
+  <img id="modalImage" alt="">
+</div>
+
+<footer>SOCIETY OF SINNERS</footer>
+
+<script>
+const artworks = [{"title": "BLOOD MOON", "image": "artworks/BLOOD MOON.png"}, {"title": "BONEFIRE RITUAL", "image": "artworks/BONEFIRE RITUAL .png"}, {"title": "FALLEN ANGELS", "image": "artworks/FALLEN ANGELS .png"}, {"title": "HERE WE WOE AGAIN", "image": "artworks/HERE WE WOE AGAIN.png"}, {"title": "NIGHT SORCERESS", "image": "artworks/NIGHT SORCERESS.png"}, {"title": "ONCE UPON A NIGHTMARE", "image": "artworks/ONCE UPON A NIGHTMARE.gif"}, {"title": "PUMPKIN CURSE", "image": "artworks/PUMPKIN CURSE .png"}, {"title": "SINS OF ROSES", "image": "artworks/SINS OF ROSES.png"}, {"title": "THE LAST VOW", "image": "artworks/THE LAST VOW .png"}, {"title": "THE LOST CAVERNS", "image": "artworks/THE LOST CAVERNS.png"}, {"title": "THE WITCH HOUR", "image": "artworks/THE WITCH HOUR.png"}];
+const gallery = document.getElementById("gallery");
+const search = document.getElementById("search");
+const count = document.getElementById("count");
+const modal = document.getElementById("modal");
+const modalTitle = document.getElementById("modalTitle");
+const modalImage = document.getElementById("modalImage");
+
+function openArtwork(item) {
+  modalTitle.textContent = item.title;
+  modalImage.src = item.image;
+  modalImage.alt = item.title;
+  modal.classList.add("open");
+}
+
+function closeArtwork() {
+  modal.classList.remove("open");
+  modalImage.removeAttribute("src");
+}
+
+function render() {
+  const term = search.value.trim().toLowerCase();
+  const filtered = artworks.filter(item =>
+    item.title.toLowerCase().includes(term)
+  );
+
+  gallery.replaceChildren();
+
+  filtered.forEach(item => {
+    const card = document.createElement("article");
+    card.className = "card";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", "View " + item.title);
+
+    const img = document.createElement("img");
+    img.src = item.image;
+    img.alt = item.title;
+    img.loading = "lazy";
+
+    const title = document.createElement("h2");
+    title.textContent = item.title;
+
+    card.append(img, title);
+    card.addEventListener("click", () => openArtwork(item));
+    card.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openArtwork(item);
+      }
+    });
+
+    gallery.appendChild(card);
+  });
+
+  count.textContent = filtered.length + " artwork(s)";
+}
+
+search.addEventListener("input", render);
+document.getElementById("close").addEventListener("click", closeArtwork);
+modal.addEventListener("click", event => {
+  if (event.target === modal) closeArtwork();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") closeArtwork();
+});
+
+render();
+</script>
+</body>
+</html>
